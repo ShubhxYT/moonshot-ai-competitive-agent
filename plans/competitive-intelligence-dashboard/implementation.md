@@ -210,7 +210,7 @@ STOP AND COMMIT
 
 **Files:** `src/scraper/utils.py`, `src/scraper/base.py`, `src/scraper/amazon_scraper.py`
 
-- [ ] Create `src/scraper/utils.py`
+- [x] Create `src/scraper/utils.py`
   ```python
   import logging
   import time
@@ -272,7 +272,7 @@ STOP AND COMMIT
       return response.text
   ```
 
-- [ ] Create `src/scraper/base.py`
+- [x] Create `src/scraper/base.py`
   ```python
   import json
   import logging
@@ -311,7 +311,7 @@ STOP AND COMMIT
           ...
   ```
 
-- [ ] Create `src/scraper/amazon_scraper.py`
+- [x] Create `src/scraper/amazon_scraper.py`
   ```python
   import logging
   import re
@@ -486,8 +486,8 @@ STOP AND COMMIT
           return all_products
   ```
 
-- [ ] Verify: Run `python -c "from src.scraper.amazon_scraper import AmazonProductScraper; print('Import OK')"` — should succeed
-- [ ] Verify: Syntax check — `python -m py_compile src/scraper/utils.py && python -m py_compile src/scraper/base.py && python -m py_compile src/scraper/amazon_scraper.py`
+- [x] Verify: Run `python -c "from src.scraper.amazon_scraper import AmazonProductScraper; print('Import OK')"` — should succeed
+- [x] Verify: Syntax check — `python -m py_compile src/scraper/utils.py && python -m py_compile src/scraper/base.py && python -m py_compile src/scraper/amazon_scraper.py`
 
 STOP AND COMMIT
 
@@ -497,7 +497,7 @@ STOP AND COMMIT
 
 **Files:** `src/scraper/review_scraper.py`
 
-- [ ] Create `src/scraper/review_scraper.py`
+- [x] Create `src/scraper/review_scraper.py`
   ```python
   import logging
   import re
@@ -635,7 +635,7 @@ STOP AND COMMIT
           return all_reviews
   ```
 
-- [ ] Verify: `python -m py_compile src/scraper/review_scraper.py`
+- [x] Verify: `python -m py_compile src/scraper/review_scraper.py`
 
 STOP AND COMMIT
 
