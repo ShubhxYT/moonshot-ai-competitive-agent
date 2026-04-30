@@ -1,0 +1,57 @@
+.stApp {
+    max-width: 1400px;
+}
+
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+}
+
+section[data-testid="stSidebar"] .stMarkdown,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] .stSelectbox label {
+    color: #e0e0e0 !important;
+}
+
+h1, h2, h3 {
+    color: #1a1a2e !important;
+}
+
+.stMetric {
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.stMetric label {
+    font-size: 13px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stMetric .stMetricValue {
+    font-size: 24px !important;
+}
+
+.stDataFrame {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+button[kind="primary"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.stAlert {
+    border-radius: 8px;
+}
+
+.element-container:has(.stPlotlyChart) {
+    padding: 5px 0;
+}
+
+@media (max-width: 768px) {
+    .stApp {
+        max-width: 100%;
+    }
+}
