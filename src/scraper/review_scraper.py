@@ -122,13 +122,18 @@ class AmazonReviewScraper(BaseScraper):
         logger.info(f"Scraped {len(reviews)} reviews for ASIN {asin}")
         return reviews
 
-    def scrape(self, products: list[dict], reviews_per_product: int = 5) -> list[dict]:
+    def scrape(self, products: list[dict], reviews_per_product: int = 5, max_products_per_brand: int = 3) -> list[dict]:
         all_reviews = []
+        brand_counts = {}
+
         for product in products:
-            asin = product["asin"]
             brand = product.get("brand", "Unknown")
+            if brand_counts.get(brand, 0) >= max_products_per_brand:
+                continue
+            asin = product["asin"]
             reviews = self.scrape_product_reviews(asin, brand, reviews_per_product)
             all_reviews.extend(reviews)
+            brand_counts[brand] = brand_counts.get(brand, 0) + 1
 
         self.save_raw(all_reviews, "reviews_raw.json")
         return all_reviews
