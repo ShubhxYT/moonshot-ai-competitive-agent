@@ -17,44 +17,43 @@ Competitive intelligence dashboard for luggage brands on Amazon India. Scrapes p
 
 ## Pipeline
 
-1. **Scrape products** (requires ScraperAPI key in `.env`):
+1. **Generate demo sample data**:
    ```bash
-   uv run python -m src.scraper.amazon_scraper
+   uv run python scripts/seed_data.py
    ```
 
-2. **Scrape reviews**:
-   ```bash
-   uv run python -m src.scraper.review_scraper
-   ```
-
-3. **Clean data**:
+2. **Clean data**:
    ```bash
    uv run python -m src.analysis.clean_data
    ```
 
-4. **Sentiment analysis** (requires Groq API key):
+3. **Sentiment analysis** (requires Groq API key):
    ```bash
    uv run python -m src.analysis.sentiment
    ```
 
-5. **Themes**:
+4. **Themes**:
    ```bash
    uv run python -m src.analysis.themes
    ```
 
-6. **Competitive matrix**:
+5. **Competitive matrix**:
    ```bash
    uv run python -m src.analysis.competitive
    ```
 
-7. **Launch dashboard**:
+6. **Launch dashboard**:
    ```bash
    uv run streamlit run src/dashboard/app.py
    ```
 
-Or all at once:
+Or run the demo pipeline in sequence:
 ```bash
-uv run python run_pipeline.py --all
+uv run python scripts/seed_data.py
+uv run python -m src.analysis.clean_data
+uv run python -m src.analysis.sentiment
+uv run python -m src.analysis.themes
+uv run python -m src.analysis.competitive
 ```
 
 ## Project Structure
@@ -75,7 +74,6 @@ src/
 └── dashboard/        # Streamlit dashboard
     ├── app.py               # Main app entry
     ├── components.py        # Shared components & data loading
-    ├── styles.css           # Custom styling
     └── pages/               # Dashboard pages
 ```
 

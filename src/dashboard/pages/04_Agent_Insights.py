@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import plotly.express as px
 import streamlit as st
@@ -126,7 +126,6 @@ if not competitive_matrix.empty and "avg_value_for_money" in competitive_matrix.
 else:
     st.info("Value for money data not available. Run the competitive analysis pipeline.")
 
-if st.button("📥 Download Insights as JSON"):
-    import json
-    json_str = json.dumps(insights_data, ensure_ascii=False, indent=2)
-    st.download_button("Download", json_str, "insights.json", "application/json")
+import json
+json_str = json.dumps(insights_data, ensure_ascii=False, indent=2)
+st.download_button("📥 Download Insights as JSON", json_str, "insights.json", "application/json")

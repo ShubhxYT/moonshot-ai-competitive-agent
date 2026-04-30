@@ -108,3 +108,20 @@ class ThemeExtractor:
 
         logger.info(f"Theme extraction complete for {len(all_themes)} brands")
         return all_themes
+
+
+if __name__ == "__main__":
+    import yaml
+    from dotenv import load_dotenv
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    load_dotenv()
+    config_path = PROJECT_ROOT / "config.yaml"
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    sentiment_df = pd.read_csv(OUTPUT_DIR / "sentiment_scores.csv")
+    reviews_df = pd.read_csv(PROJECT_ROOT / "data" / "cleaned" / "reviews.csv")
+    extractor = ThemeExtractor(model=config["sentiment"]["model"])
+    themes = extractor.run(sentiment_df, reviews_df)
+    print(f"Extracted themes for {len(themes)} brands → data/outputs/themes.json")

@@ -12,9 +12,10 @@ BASE_URL = "https://www.amazon.in"
 
 
 class AmazonProductScraper(BaseScraper):
-    def __init__(self, api_key: str | None = None, requests_per_minute: int = 30, max_pages: int = 1):
+    def __init__(self, api_key: str | None = None, requests_per_minute: int = 30, max_pages: int = 1, products_per_brand: int = 3):
         super().__init__(api_key, requests_per_minute)
         self.max_pages = max_pages
+        self.products_per_brand = products_per_brand
 
     def _build_search_url(self, query: str, page: int = 1) -> str:
         encoded_query = quote_plus(query)
@@ -96,7 +97,7 @@ class AmazonProductScraper(BaseScraper):
                 rating_el = card.select_one("span.a-icon-alt")
                 rating = self._parse_rating(rating_el.get_text(strip=True)) if rating_el else None
 
-            review_count_el = card.select_one("span.a-size-base[href*='reviews']")
+            review_count_el = card.select_one("a[href*='reviews'] span.a-size-base")
             review_count = self._parse_review_count(review_count_el.get_text(strip=True)) if review_count_el else None
             if review_count is None:
                 review_count_el = card.select_one("a span.a-size-base")
@@ -155,7 +156,7 @@ class AmazonProductScraper(BaseScraper):
                     seen_asins.add(product["asin"])
                     products.append(product)
 
-            if len(seen_asins) >= 3:
+            if len(seen_asins) >= self.products_per_brand:
                 break
 
         logger.info(f"Scraped {len(products)} products for {brand_name}")
@@ -169,3 +170,25 @@ class AmazonProductScraper(BaseScraper):
 
         self.save_raw(all_products, "products_raw.json")
         return all_products
+
+
+if __name__ == "__main__":
+    import os
+    from pathlib import Path
+    import yaml
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    config_path = Path(__file__).resolve().parents[2] / "config.yaml"
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    scraper = AmazonProductScraper(
+        api_key=os.getenv("SCRAPER_API_KEY"),
+        requests_per_minute=config["scraping"]["requests_per_minute"],
+        max_pages=config["scraping"]["max_search_pages"],
+        products_per_brand=config["scraping"]["products_per_brand"],
+    )
+    products = scraper.scrape(config["brands"])
+    print(f"Scraped {len(products)} products")

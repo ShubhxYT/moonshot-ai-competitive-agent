@@ -52,9 +52,9 @@ def build_competitive_matrix(products_df: pd.DataFrame, reviews_df: pd.DataFrame
     ).round(2)
 
     matrix = brand_summary_df.set_index("brand_name")
-    matrix = matrix.join(sentiment_brand.set_index("brand"), how="left")
+    matrix = matrix.join(sentiment_brand, how="left")
     matrix = matrix.join(price_band_dist, how="left")
-    matrix = matrix.join(vfm_by_brand.set_index("brand"), how="left")
+    matrix = matrix.join(vfm_by_brand, how="left")
     matrix = matrix.reset_index().rename(columns={"brand_name": "brand"})
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

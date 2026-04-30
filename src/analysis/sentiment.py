@@ -71,6 +71,20 @@ class SentimentAnalyzer:
             logger.error(f"Groq API error: {e}")
             raise
 
+    def _call_groq_array(self, prompt: str, max_tokens: int = 4096) -> str:
+        """Call Groq without json_object constraint so the model can return a bare JSON array."""
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=max_tokens,
+                temperature=0.1,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.error(f"Groq API error: {e}")
+            raise
+
     def analyze_single(self, review_title: str, review_body: str, review_id: str = "") -> dict:
         if review_id and review_id in self.cache:
             return self.cache[review_id]
@@ -123,7 +137,7 @@ class SentimentAnalyzer:
                 )
 
                 try:
-                    response = self._call_groq(prompt)
+                    response = self._call_groq_array(prompt)
                     parsed = json.loads(response)
                     if isinstance(parsed, dict):
                         parsed = parsed.get("results", parsed.get("reviews", [parsed]))
@@ -170,3 +184,22 @@ class SentimentAnalyzer:
         sentiment_df.to_csv(OUTPUT_DIR / "sentiment_scores.csv", index=False)
         logger.info(f"Sentiment analysis complete: {len(sentiment_df)} reviews scored")
         return sentiment_df
+
+
+if __name__ == "__main__":
+    import yaml
+    from dotenv import load_dotenv
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    load_dotenv()
+    config_path = PROJECT_ROOT / "config.yaml"
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    reviews_df = pd.read_csv(PROJECT_ROOT / "data" / "cleaned" / "reviews.csv")
+    analyzer = SentimentAnalyzer(
+        model=config["sentiment"]["model"],
+        batch_size=config["sentiment"]["batch_size"],
+    )
+    sentiment_df = analyzer.run(reviews_df)
+    print(f"Scored {len(sentiment_df)} reviews → data/outputs/sentiment_scores.csv")

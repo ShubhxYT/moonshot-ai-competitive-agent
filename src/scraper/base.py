@@ -17,10 +17,10 @@ class BaseScraper(ABC):
         self.rate_limiter = RateLimiter(requests_per_minute)
         self.use_api = api_key is not None
 
-    def fetch(self, url: str) -> str:
+    def fetch(self, url: str, render: bool = False) -> str:
         self.rate_limiter.wait()
         if self.use_api:
-            return fetch_via_scraper_api(url, self.api_key, self.session)
+            return fetch_via_scraper_api(url, self.api_key, self.session, render=render)
         return fetch_direct(url, self.session)
 
     def save_raw(self, data: list[dict], filename: str):

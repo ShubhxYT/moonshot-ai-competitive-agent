@@ -28,6 +28,7 @@ def step_scrape_products(config: dict, api_key: str | None = None):
         api_key=api_key,
         requests_per_minute=config["scraping"]["requests_per_minute"],
         max_pages=config["scraping"]["max_search_pages"],
+        products_per_brand=config["scraping"]["products_per_brand"],
     )
     products = scraper.scrape(config["brands"])
     logger.info(f"Step 1 complete: {len(products)} products scraped")
@@ -45,9 +46,12 @@ def step_scrape_reviews(config: dict, api_key: str | None = None):
     scraper = AmazonReviewScraper(
         api_key=api_key,
         requests_per_minute=config["scraping"]["requests_per_minute"],
-        max_pages=config["scraping"]["max_review_pages"],
     )
-    reviews = scraper.scrape(products, config["scraping"]["reviews_per_product"])
+    reviews = scraper.scrape(
+        products,
+        reviews_per_product=config["scraping"]["reviews_per_product"],
+        max_products_per_brand=config["scraping"]["products_per_brand"],
+    )
     logger.info(f"Step 2 complete: {len(reviews)} reviews scraped")
     return reviews
 

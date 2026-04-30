@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import plotly.express as px
 import streamlit as st
@@ -61,7 +61,9 @@ with col4:
 
 col5, col6, col7 = st.columns(3)
 with col5:
-    st.metric("Reviews", f"{int(product.get('review_count', 0)):,}")
+    review_count = product.get("review_count", 0)
+    review_count = int(review_count) if pd.notna(review_count) else 0
+    st.metric("Reviews", f"{review_count:,}")
 with col6:
     st.metric("Brand", product["brand"])
 with col7:
@@ -182,7 +184,6 @@ if not product_reviews.empty and "date" in product_reviews.columns:
 else:
     st.info("No review timeline data available")
 
-if st.button("📥 Download Product Reviews as CSV"):
-    if not product_reviews.empty:
-        csv = product_reviews.to_csv(index=False)
-        st.download_button("Download Reviews", csv, f"reviews_{asin}.csv", "text/csv")
+if not product_reviews.empty:
+    csv = product_reviews.to_csv(index=False)
+    st.download_button("📥 Download Product Reviews as CSV", csv, f"reviews_{asin}.csv", "text/csv")

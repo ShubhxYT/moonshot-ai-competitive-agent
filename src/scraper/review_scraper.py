@@ -12,12 +12,11 @@ BASE_URL = "https://www.amazon.in"
 
 
 class AmazonReviewScraper(BaseScraper):
-    def __init__(self, api_key: str | None = None, requests_per_minute: int = 30, max_pages: int = 2):
+    def __init__(self, api_key: str | None = None, requests_per_minute: int = 30):
         super().__init__(api_key, requests_per_minute)
-        self.max_pages = max_pages
 
-    def _build_review_url(self, asin: str, page: int = 1) -> str:
-        return f"{BASE_URL}/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page}?ie=UTF8&reviewerType=all_reviews&pageNumber={page}"
+    def _build_product_url(self, asin: str) -> str:
+        return f"{BASE_URL}/dp/{asin}"
 
     def _parse_date(self, date_text: str | None) -> str | None:
         if not date_text:
@@ -36,42 +35,49 @@ class AmazonReviewScraper(BaseScraper):
             return int(match.group(1))
         return None
 
-    def _parse_helpful_votes(self, text: str | None) -> int:
-        if not text:
-            return 0
-        match = re.search(r"(\d+)", text)
-        return int(match.group(1)) if match else 0
+    def _parse_title(self, review_el) -> str | None:
+        try:
+            el = review_el.select_one("[data-hook='reviewTitle']")
+            if el:
+                return el.get_text(strip=True)
+            el = review_el.select_one("[data-hook='review-title']")
+            if el:
+                spans = el.find_all("span", recursive=False)
+                if spans:
+                    return spans[-1].get_text(strip=True)
+                return el.get_text(strip=True)
+        except Exception:
+            return None
+
+    def _parse_body(self, review_el) -> str:
+        try:
+            el = review_el.select_one("[data-hook='reviewRichContentContainer']")
+            if el:
+                return el.get_text(strip=True)
+            el = review_el.select_one("[data-hook='review-body']")
+            if el:
+                return el.get_text(strip=True)
+        except Exception:
+            pass
+        return ""
 
     def _parse_review(self, review_el) -> dict | None:
         try:
             review_id = review_el.get("id", "")
-
-            title_el = review_el.select_one("[data-hook='review-title'] span:last-child")
-            if not title_el:
-                title_el = review_el.select_one("[data-hook='review-title']")
-            title = title_el.get_text(strip=True) if title_el else None
-
-            body_el = review_el.select_one("[data-hook='review-body'] span")
-            if not body_el:
-                body_el = review_el.select_one("[data-hook='review-body']")
-            body = body_el.get_text(strip=True) if body_el else ""
+            title = self._parse_title(review_el)
+            body = self._parse_body(review_el)
 
             if not title and not body:
                 return None
 
-            rating_el = review_el.select_one("[data-hook='review-star-rating'] span, i[data-hook='review-star-rating'] span")
+            rating_el = review_el.select_one("[data-hook='review-star-rating']")
             rating = self._parse_rating(rating_el.get_text(strip=True)) if rating_el else None
 
             date_el = review_el.select_one("[data-hook='review-date']")
             date = self._parse_date(date_el.get_text(strip=True)) if date_el else None
 
-            verified_el = review_el.select_one("span.a-size-mini")
-            verified = False
-            if verified_el:
-                verified = "verified" in verified_el.get_text(strip=True).lower()
-
-            helpful_el = review_el.select_one("[data-hook='helpful-vote-statement']")
-            helpful_votes = self._parse_helpful_votes(helpful_el.get_text(strip=True)) if helpful_el else 0
+            verified_el = review_el.select_one("[data-hook='avp-badge'], [data-hook='avp-badge-linkless']")
+            verified = bool(verified_el)
 
             return {
                 "review_id": review_id,
@@ -80,7 +86,7 @@ class AmazonReviewScraper(BaseScraper):
                 "rating": rating,
                 "date": date,
                 "verified_purchase": verified,
-                "helpful_votes": helpful_votes,
+                "helpful_votes": 0,
             }
         except Exception as e:
             logger.warning(f"Error parsing review: {e}")
@@ -90,31 +96,30 @@ class AmazonReviewScraper(BaseScraper):
         reviews = []
         seen_ids = set()
 
-        for page in range(1, self.max_pages + 1):
-            url = self._build_review_url(asin, page)
-            logger.info(f"Scraping reviews for ASIN {asin} - page {page}")
+        url = self._build_product_url(asin)
+        logger.info(f"Scraping reviews for ASIN {asin} from product page")
 
-            try:
-                html = self.fetch(url)
-            except Exception as e:
-                logger.error(f"Failed to fetch reviews for {asin} page {page}: {e}")
-                continue
+        try:
+            html = self.fetch(url)
+        except Exception as e:
+            logger.error(f"Failed to fetch product page for {asin}: {e}")
+            return []
 
-            soup = BeautifulSoup(html, "html.parser")
-            review_els = soup.select("[data-hook='review']")
+        soup = BeautifulSoup(html, "html.parser")
+        review_els = soup.select("[data-hook='review']")
 
-            if not review_els:
-                logger.info(f"No more reviews for ASIN {asin} at page {page}")
-                break
+        if not review_els:
+            logger.info(f"No reviews found for ASIN {asin}")
+            return []
 
-            for review_el in review_els:
-                review = self._parse_review(review_el)
-                if review and review["review_id"] not in seen_ids:
-                    review["asin"] = asin
-                    review["brand"] = brand
-                    if review.get("body") and len(review["body"].strip()) > 10:
-                        seen_ids.add(review["review_id"])
-                        reviews.append(review)
+        for review_el in review_els:
+            review = self._parse_review(review_el)
+            if review and review["review_id"] not in seen_ids:
+                review["asin"] = asin
+                review["brand"] = brand
+                if review.get("body") and len(review["body"].strip()) > 10:
+                    seen_ids.add(review["review_id"])
+                    reviews.append(review)
 
             if len(reviews) >= max_reviews:
                 break
@@ -122,13 +127,13 @@ class AmazonReviewScraper(BaseScraper):
         logger.info(f"Scraped {len(reviews)} reviews for ASIN {asin}")
         return reviews
 
-    def scrape(self, products: list[dict], reviews_per_product: int = 5, max_products_per_brand: int = 3) -> list[dict]:
+    def scrape(self, products: list[dict], reviews_per_product: int = 5, max_products_per_brand: int | None = None) -> list[dict]:
         all_reviews = []
         brand_counts = {}
 
         for product in products:
             brand = product.get("brand", "Unknown")
-            if brand_counts.get(brand, 0) >= max_products_per_brand:
+            if max_products_per_brand is not None and brand_counts.get(brand, 0) >= max_products_per_brand:
                 continue
             asin = product["asin"]
             reviews = self.scrape_product_reviews(asin, brand, reviews_per_product)
@@ -137,3 +142,32 @@ class AmazonReviewScraper(BaseScraper):
 
         self.save_raw(all_reviews, "reviews_raw.json")
         return all_reviews
+
+
+if __name__ == "__main__":
+    import json
+    import os
+    from pathlib import Path
+    import yaml
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    config_path = Path(__file__).resolve().parents[2] / "config.yaml"
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    products_path = Path(__file__).resolve().parents[2] / "data" / "raw" / "products_raw.json"
+    with open(products_path) as f:
+        products = json.load(f)
+
+    scraper = AmazonReviewScraper(
+        api_key=os.getenv("SCRAPER_API_KEY"),
+        requests_per_minute=config["scraping"]["requests_per_minute"],
+    )
+    reviews = scraper.scrape(
+        products,
+        reviews_per_product=config["scraping"]["reviews_per_product"],
+        max_products_per_brand=config["scraping"]["products_per_brand"],
+    )
+    print(f"Scraped {len(reviews)} reviews")

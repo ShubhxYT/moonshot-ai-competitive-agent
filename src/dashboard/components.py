@@ -113,7 +113,7 @@ def get_brand_colors() -> dict:
 
 def no_data_message():
     st.warning("No data found. Please run the scraping and analysis pipeline first.")
-    st.code("python -m src.scraper.amazon_scraper\npython -m src.scraper.review_scraper\npython -m src.analysis.clean_data\npython -m src.analysis.sentiment\npython -m src.analysis.themes\npython -m src.analysis.competitive")
+    st.code("uv run python -m src.scraper.amazon_scraper\nuv run python -m src.scraper.review_scraper\nuv run python -m src.analysis.clean_data\nuv run python -m src.analysis.sentiment\nuv run python -m src.analysis.themes\nuv run python -m src.analysis.competitive")
 
 
 def download_csv_button(df: pd.DataFrame, filename: str, button_label: str = "📥 Download CSV"):

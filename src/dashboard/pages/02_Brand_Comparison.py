@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -43,6 +43,10 @@ price_range = st.sidebar.slider(
     int(products_df["price"].max()),
     (int(products_df["price"].min()), int(products_df["price"].max())),
 )
+
+if not selected_brands:
+    st.info("Select at least one brand from the sidebar.")
+    st.stop()
 
 filtered_products = products_df[
     (products_df["brand"].isin(selected_brands))
@@ -153,6 +157,5 @@ for i, brand in enumerate(selected_brands):
 
 st.markdown("---")
 
-if st.button("📥 Download Filtered Data as CSV"):
-    csv = filtered_products.to_csv(index=False)
-    st.download_button("Download", csv, "brand_comparison.csv", "text/csv")
+csv = filtered_products.to_csv(index=False)
+st.download_button("📥 Download Filtered Data as CSV", csv, "brand_comparison.csv", "text/csv")

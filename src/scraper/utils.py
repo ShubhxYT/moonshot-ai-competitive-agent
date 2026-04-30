@@ -33,13 +33,15 @@ class RateLimiter:
         self.last_request_time = time.time()
 
 
-def fetch_via_scraper_api(url: str, api_key: str, session: requests.Session = None) -> str:
+def fetch_via_scraper_api(url: str, api_key: str, session: requests.Session = None, render: bool = False) -> str:
     if session is None:
         session = create_session()
     api_url = "http://api.scraperapi.com/"
     params = {"api_key": api_key, "url": url, "country_code": "in"}
+    if render:
+        params["render"] = "true"
     logger.info(f"Fetching via ScraperAPI: {url}")
-    response = session.get(api_url, params=params, timeout=60)
+    response = session.get(api_url, params=params, timeout=120)
     response.raise_for_status()
     return response.text
 
