@@ -12,7 +12,7 @@ BASE_URL = "https://www.amazon.in"
 
 
 class AmazonProductScraper(BaseScraper):
-    def __init__(self, api_key: str | None = None, requests_per_minute: int = 30, max_pages: int = 3):
+    def __init__(self, api_key: str | None = None, requests_per_minute: int = 30, max_pages: int = 1):
         super().__init__(api_key, requests_per_minute)
         self.max_pages = max_pages
 
@@ -155,7 +155,7 @@ class AmazonProductScraper(BaseScraper):
                     seen_asins.add(product["asin"])
                     products.append(product)
 
-            if len(seen_asins) >= 15:
+            if len(seen_asins) >= 3:
                 break
 
         logger.info(f"Scraped {len(products)} products for {brand_name}")

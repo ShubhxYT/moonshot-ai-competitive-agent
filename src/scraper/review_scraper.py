@@ -12,12 +12,12 @@ BASE_URL = "https://www.amazon.in"
 
 
 class AmazonReviewScraper(BaseScraper):
-    def __init__(self, api_key: str | None = None, requests_per_minute: int = 30, max_pages: int = 5):
+    def __init__(self, api_key: str | None = None, requests_per_minute: int = 30, max_pages: int = 2):
         super().__init__(api_key, requests_per_minute)
         self.max_pages = max_pages
 
     def _build_review_url(self, asin: str, page: int = 1) -> str:
-        return f"{BASE_URL}/product-reviews/{asin}?reviewerType=all_reviews&pageNumber={page}"
+        return f"{BASE_URL}/product-reviews/{asin}/ref=cm_cr_arp_d_paging_btm_next_{page}?ie=UTF8&reviewerType=all_reviews&pageNumber={page}"
 
     def _parse_date(self, date_text: str | None) -> str | None:
         if not date_text:
@@ -86,7 +86,7 @@ class AmazonReviewScraper(BaseScraper):
             logger.warning(f"Error parsing review: {e}")
             return None
 
-    def scrape_product_reviews(self, asin: str, brand: str, max_reviews: int = 50) -> list[dict]:
+    def scrape_product_reviews(self, asin: str, brand: str, max_reviews: int = 5) -> list[dict]:
         reviews = []
         seen_ids = set()
 
@@ -122,7 +122,7 @@ class AmazonReviewScraper(BaseScraper):
         logger.info(f"Scraped {len(reviews)} reviews for ASIN {asin}")
         return reviews
 
-    def scrape(self, products: list[dict], reviews_per_product: int = 50) -> list[dict]:
+    def scrape(self, products: list[dict], reviews_per_product: int = 5) -> list[dict]:
         all_reviews = []
         for product in products:
             asin = product["asin"]
