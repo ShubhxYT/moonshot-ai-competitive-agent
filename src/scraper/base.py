@@ -33,3 +33,4 @@ class BaseScraper(ABC):
     @abstractmethod
     def scrape(self, **kwargs) -> list[dict]:
         ...
+# 
