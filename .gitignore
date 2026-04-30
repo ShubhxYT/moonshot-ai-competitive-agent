@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+data/raw/
+data/cleaned/
+data/outputs/
+!data/raw/.gitkeep
+!data/cleaned/.gitkeep
+!data/outputs/.gitkeep
+.venv/
+venv/
+.DS_Store
+*.log
+.streamlit/secrets.toml

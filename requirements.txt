@@ -1,0 +1,8 @@
+requests>=2.31
+pandas>=2.1
+streamlit>=1.36
+plotly>=5.18
+beautifulsoup4>=4.12
+groq>=0.5
+pyyaml>=6.0
+python-dotenv>=1.0

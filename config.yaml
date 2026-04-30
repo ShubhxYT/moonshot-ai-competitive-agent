@@ -1,0 +1,31 @@
+brands:
+  - name: Safari
+    search_query: "Safari luggage"
+  - name: Skybags
+    search_query: "Skybags luggage"
+  - name: American Tourister
+    search_query: "American Tourister suitcase"
+  - name: VIP
+    search_query: "VIP luggage"
+  - name: Aristocrat
+    search_query: "Aristocrat luggage"
+  - name: Nasher Miles
+    search_query: "Nasher Miles luggage"
+
+scraping:
+  products_per_brand: 10
+  reviews_per_product: 50
+  max_search_pages: 3
+  max_review_pages: 5
+  requests_per_minute: 30
+  retry_attempts: 3
+  retry_delay_seconds: 2
+
+sentiment:
+  batch_size: 10
+  model: "llama-3.3-70b-versatile"
+  max_tokens_per_batch: 4096
+
+dashboard:
+  title: "Luggage Brand Intelligence — Amazon India"
+  theme: "wide"
