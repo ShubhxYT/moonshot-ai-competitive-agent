@@ -17,35 +17,44 @@ Competitive intelligence dashboard for luggage brands on Amazon India. Scrapes p
 
 ## Pipeline
 
-Run each step in order:
+1. **Scrape products** (requires ScraperAPI key in `.env`):
+   ```bash
+   uv run python -m src.scraper.amazon_scraper
+   ```
 
+2. **Scrape reviews**:
+   ```bash
+   uv run python -m src.scraper.review_scraper
+   ```
+
+3. **Clean data**:
+   ```bash
+   uv run python -m src.analysis.clean_data
+   ```
+
+4. **Sentiment analysis** (requires Groq API key):
+   ```bash
+   uv run python -m src.analysis.sentiment
+   ```
+
+5. **Themes**:
+   ```bash
+   uv run python -m src.analysis.themes
+   ```
+
+6. **Competitive matrix**:
+   ```bash
+   uv run python -m src.analysis.competitive
+   ```
+
+7. **Launch dashboard**:
+   ```bash
+   uv run streamlit run src/dashboard/app.py
+   ```
+
+Or all at once:
 ```bash
-# 1. Scrape product listings
-python -m src.scraper.amazon_scraper
-
-# 2. Scrape product reviews
-python -m src.scraper.review_scraper
-
-# 3. Clean and structure data
-python -m src.analysis.clean_data
-
-# 4. Run sentiment analysis (requires GROQ_API_KEY)
-python -m src.analysis.sentiment
-
-# 5. Extract themes
-python -m src.analysis.themes
-
-# 6. Build competitive analysis
-python -m src.analysis.competitive
-
-# 7. Generate agent insights
-python -m src.analysis.insights_generator
-```
-
-## Dashboard
-
-```bash
-streamlit run src/dashboard/app.py
+uv run python run_pipeline.py --all
 ```
 
 ## Project Structure
